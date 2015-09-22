@@ -33,8 +33,8 @@ namespace goLinkDownloader
             client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0");
             client.Headers.Add("Referer", "http://analytics.inservices.tatamotors.com:8080/analytics/saw.dll?GO&nquser=AROY_08846&nqpassword=CRM2016&path=/Shared/TMP/Athena%20DRP%20Test/SCV%20DRP/Sales%20Pipeline%20Tracker&Format=csv");
             client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-            client.DownloadProgressChanged += Client_DownloadProgressCallback;
-            client.DownloadFileCompleted += Client_DownloadFileCompleted;
+            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(Client_DownloadProgressChanged);
+            client.DownloadFileCompleted += new AsyncCompletedEventHandler(Client_DownloadFileCompleted);
             client.DownloadFileAsync(link, @"C:\Users\Vineeth\Desktop\SPT.csv");
 
         }
@@ -45,20 +45,21 @@ namespace goLinkDownloader
             this.Close();
         }
 
-        private void Client_DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
+        private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             double bytesIn = double.Parse(e.BytesReceived.ToString());
             double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
             if( totalBytes < 0) {
-                totalBytes = 66060288;
+                totalBytes = 62914560;
             }
             double percentage = bytesIn / totalBytes * 100;
-            lblStatus.Text = "Dowloaded " + e.BytesReceived + " of" + e.TotalBytesToReceive;
-            lblStatus.Text = "{0}   downloaded {1} of {2} bytes | {3} % complete...";
+            lblStatus.Text = "Dowloaded " + e.BytesReceived + " of estimated " + totalBytes;
+            //lblStatus.Text = "Downloaded {1} of {2} bytes | {3} % complete...";
             //progressBar1.Maximum = (int)e.TotalBytesToReceive/100;
             progressBar1.Value = int.Parse(Math.Truncate(percentage).ToString());
         }
     }
+
         namespace HTMLParser
     {
         internal class CookieAwareWebClient : WebClient
@@ -71,6 +72,7 @@ namespace goLinkDownloader
                 if (request is HttpWebRequest)
                 {
                     (request as HttpWebRequest).CookieContainer = cookie;
+                    (request as HttpWebRequest).KeepAlive = false;
                 }
                 return request;
             }
