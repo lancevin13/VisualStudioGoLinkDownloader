@@ -46,13 +46,15 @@ namespace goLinkDownloader
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            lblStatus.Text = "Checking connection...";
             if(!checkConnection.connectionStatus())
             {
                 MessageBox.Show("You do not seem to have an active internet connection. Please check and run this application again.", "No connection found!", MessageBoxButtons.OK,MessageBoxIcon.Exclamation);
                 this.Close();
             }
-            
-            Uri link = new Uri("http://analytics.inservices.tatamotors.com:8080/analytics/saw.dll?GO&nquser=AROY_08846&nqpassword=CRM2016&path=/Shared/TMP/Athena%20DRP%20Test/SCV%20DRP/Sales%20Pipeline%20Tracker&Format=csv");
+
+            List<string> links = new List<string>();
+            links.Add("http://analytics.inservices.tatamotors.com:8080/analytics/saw.dll?GO&nquser=AROY_08846&nqpassword=CRM2016&path=/Shared/TMP/Athena%20DRP%20Test/SCV%20DRP/Sales%20Pipeline%20Tracker&Format=csv");
             var client = new HTMLParser.CookieAwareWebClient();
             
             var values = new NameValueCollection
@@ -70,7 +72,12 @@ namespace goLinkDownloader
             //MessageBox.Show(totalBytes.ToString());
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(Client_DownloadProgressChanged);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(Client_DownloadFileCompleted);
-            client.DownloadFileAsync(link, @"C:\Users\Vineeth\Desktop\SPT.csv");
+
+            foreach(string link in links)
+            {
+                client.DownloadFileAsync(new Uri(link), @"C:\Users\Vineeth\Desktop\SPT.csv");
+            }
+            
         }
 
         private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
